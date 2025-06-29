@@ -1,15 +1,14 @@
-import { UserList } from "./components/UsertList"
-import { UserProvider } from "./context/user.context"
+import { UserList } from "./components/UsertList";
+import { UserProvider } from "./context/user.context";
 
 function App() {
-
   return (
     <>
-    <UserProvider>
-    <UserList/>
-    </UserProvider>
+      <UserProvider>
+        <UserList />
+      </UserProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

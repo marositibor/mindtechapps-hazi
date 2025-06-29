@@ -6,7 +6,13 @@ interface UserContextState {
   users: User[];
   loading: boolean;
   error: { error: unknown; message: string } | null;
+
+  selectedUser: User | null;
+  selectedUserLoading: boolean;
+  selectedUserError: { error: unknown; message: string } | null;
+
   refetch: () => void;
+  loadUserById: (id: number) => Promise<void>;
 }
 
 export const UserContext = createContext<UserContextState | undefined>(undefined);
