@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,8 +8,9 @@ import {
   Typography,
   CircularProgress,
   Box,
-} from '@mui/material';
-import { useUserContext } from '../context/useUserContext';
+} from "@mui/material";
+import { useUserContext } from "../context/useUserContext";
+import { AxiosError } from "axios";
 
 interface Props {
   userId: number | null;
@@ -17,18 +18,24 @@ interface Props {
 }
 
 export const UserDetailsModal: React.FC<Props> = ({ userId, onClose }) => {
-  const {
-    selectedUser,
-    selectedUserLoading,
-    selectedUserError,
-    loadUserById,
-  } = useUserContext();
+  const { selectedUser, selectedUserLoading, selectedUserError, loadUserById } =
+    useUserContext();
 
   useEffect(() => {
     if (userId !== null) {
       void loadUserById(userId);
     }
   }, [userId, loadUserById]);
+
+  const handleRetry = () => {
+    if (userId !== null) {
+      void loadUserById(userId);
+    }
+  };
+
+  const isNotFoundError =
+    selectedUserError?.error instanceof AxiosError &&
+    selectedUserError.error.response?.status === 404;
 
   return (
     <Dialog open={userId !== null} onClose={onClose} fullWidth maxWidth="sm">
@@ -40,19 +47,45 @@ export const UserDetailsModal: React.FC<Props> = ({ userId, onClose }) => {
           </Box>
         )}
 
-        {selectedUserError && (
-          <Typography color="error">{selectedUserError.message}</Typography>
+        {selectedUserError && !selectedUserLoading && (
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography color="error">
+              {isNotFoundError
+                ? "User not found (404)."
+                : selectedUserError.message}
+            </Typography>
+
+            {!isNotFoundError && (
+              <Button variant="outlined" onClick={handleRetry}>
+                Retry
+              </Button>
+            )}
+          </Box>
         )}
 
         {selectedUser && !selectedUserLoading && !selectedUserError && (
           <Box display="flex" flexDirection="column" gap={1}>
-            <Typography><strong>Name:</strong> {selectedUser.name}</Typography>
-            <Typography><strong>Username:</strong> {selectedUser.username}</Typography>
-            <Typography><strong>Email:</strong> {selectedUser.email}</Typography>
-            <Typography><strong>Phone:</strong> {selectedUser.phone}</Typography>
-            <Typography><strong>Website:</strong> {selectedUser.website}</Typography>
-            <Typography><strong>Company:</strong> {selectedUser.company.name}</Typography>
-            <Typography><strong>City:</strong> {selectedUser.address.city}</Typography>
+            <Typography>
+              <strong>Name:</strong> {selectedUser.name}
+            </Typography>
+            <Typography>
+              <strong>Username:</strong> {selectedUser.username}
+            </Typography>
+            <Typography>
+              <strong>Email:</strong> {selectedUser.email}
+            </Typography>
+            <Typography>
+              <strong>Phone:</strong> {selectedUser.phone}
+            </Typography>
+            <Typography>
+              <strong>Website:</strong> {selectedUser.website}
+            </Typography>
+            <Typography>
+              <strong>Company:</strong> {selectedUser.company.name}
+            </Typography>
+            <Typography>
+              <strong>City:</strong> {selectedUser.address.city}
+            </Typography>
           </Box>
         )}
       </DialogContent>

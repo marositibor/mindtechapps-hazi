@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { type User } from "../types/user.types";
 import { fetchUsers, fetchUserById } from "../api/users.api";
 import { UserContext } from "./useUserContext";
+import { AxiosError } from "axios";
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -37,23 +38,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const loadUserById = useCallback(async (id: number) => {
-    try {
-      setSelectedUser(null);
-      setSelectedUserLoading(true);
-      setSelectedUserError(null);
-      const user = await fetchUserById(id);
-      setSelectedUser(user);
-    } catch (err) {
-      setSelectedUserError({
-        error: err,
-        message:
-          err instanceof Error ? err.message : "Unknown error fetching user",
-      });
-    } finally {
-      setSelectedUserLoading(false);
-    }
-  }, []);
+const loadUserById = useCallback(async (id: number) => {
+  try {
+    setSelectedUser(null);
+    setSelectedUserLoading(true);
+    setSelectedUserError(null);
+    const user = await fetchUserById(id);
+    setSelectedUser(user);
+  } catch (err: unknown) {
+    const message =
+      err instanceof AxiosError && err.response
+        ? `Error ${err.response.status}: ${err.response.statusText}`
+        : 'Unknown error fetching user';
+
+    setSelectedUserError({ error: err, message });
+  } finally {
+    setSelectedUserLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     void loadUsers();
